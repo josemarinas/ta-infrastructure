@@ -38,6 +38,7 @@ module "sqs-input" {
   version = "2.0.0"
   name = "ta-input-queue.fifo"
   fifo_queue = true
+  visibility_timeout_seconds = 3
   tags = {
     Name = "ta-input-queue.fifo"
     Flow = "input"
@@ -49,6 +50,7 @@ module "sqs-output" {
   version = "2.0.0"
   name = "ta-output-queue.fifo"
   fifo_queue = true
+  visibility_timeout_seconds = 3
   tags = {
     Name = "ta-output-queue.fifo"
     Flow = "output"
@@ -84,31 +86,31 @@ module "sqs-output" {
 #   ]
 # }
 
-# module "instance-frontend" {
-#   instance_count = 1
-#   source  = "terraform-aws-modules/ec2-instance/aws"
-#   version = "2.8.0"
-#   ami = "ami-06358f49b5839867c" # Ubuntu bionic id
-#   instance_type = "t2.micro"
-#   name = "ta-frontend"
-#   subnet_id = module.vpc.public_subnets[0]
-#   vpc_security_group_ids      = [
-#     module.allow-public-http-security-group.this_security_group_id, 
-#     module.allow-public-https-security-group.this_security_group_id,
-#     module.allow-public-ssh-security-group.this_security_group_id,
-#     module.allow-public-icmp-security-group.this_security_group_id
-#   ]
-#   associate_public_ip_address = true
-#   key_name = "key-ta"
-#   root_block_device = [
-#     {
-#       device_name = "/dev/sda1"
-#       volume_type = "gp2"
-#       volume_size = 8
-#       encrypted   = true
-#     },
-#   ]
-# }
+module "instance-frontend" {
+  instance_count = 1
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "2.8.0"
+  ami = "ami-06358f49b5839867c" # Ubuntu bionic id
+  instance_type = "t2.micro"
+  name = "ta-frontend"
+  subnet_id = module.vpc.public_subnets[0]
+  vpc_security_group_ids      = [
+    module.allow-public-http-security-group.this_security_group_id, 
+    module.allow-public-https-security-group.this_security_group_id,
+    module.allow-public-ssh-security-group.this_security_group_id,
+    module.allow-public-icmp-security-group.this_security_group_id
+  ]
+  associate_public_ip_address = true
+  key_name = "key-ta"
+  root_block_device = [
+    {
+      device_name = "/dev/sda1"
+      volume_type = "gp2"
+      volume_size = 8
+      encrypted   = true
+    },
+  ]
+}
 
 ##################
 ### S3 BUCKETS ###
@@ -117,6 +119,12 @@ resource "aws_s3_bucket" "ta" {
   force_destroy = true
   bucket = "ta-bucket-josemarinas"
   region = "eu-west-1"
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "POST", "GET", "DELETE"]
+    allowed_origins = ["*"]
+    max_age_seconds = 3000
+  }
  }
 
 #######################

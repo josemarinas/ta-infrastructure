@@ -60,39 +60,13 @@ module "sqs-output" {
 #################
 ### INSTANCES ###
 #################
-# module "instance-echo-system" {
-#   instance_count = 2
-#   source  = "terraform-aws-modules/ec2-instance/aws"
-#   version = "2.8.0"
-#   ami = "ami-06358f49b5839867c" # Ubuntu bionic id
-#   instance_type = "t2.micro"
-#   name = "ta-echo-system"
-#   subnet_id = module.vpc.public_subnets[0]
-#   vpc_security_group_ids      = [
-#     module.allow-public-http-security-group.this_security_group_id, 
-#     module.allow-public-https-security-group.this_security_group_id,
-#     module.allow-public-ssh-security-group.this_security_group_id,
-#     module.allow-public-icmp-security-group.this_security_group_id
-#   ]
-#   associate_public_ip_address = true
-#   key_name = "key-ta"
-#   root_block_device = [
-#     {
-#       device_name = "/dev/sda1"
-#       volume_type = "gp2"
-#       volume_size = 8
-#       encrypted   = true
-#     },
-#   ]
-# }
-
-module "instance-frontend" {
-  instance_count = 1
+module "instance-echo-system" {
+  instance_count = 2
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "2.8.0"
   ami = "ami-06358f49b5839867c" # Ubuntu bionic id
   instance_type = "t2.micro"
-  name = "ta-frontend"
+  name = "ta-worker"
   subnet_id = module.vpc.public_subnets[0]
   vpc_security_group_ids      = [
     module.allow-public-http-security-group.this_security_group_id, 
@@ -110,6 +84,38 @@ module "instance-frontend" {
       encrypted   = true
     },
   ]
+  tags = {
+    Function = "ta-worker"
+  }
+}
+
+module "instance-frontend" {
+  instance_count = 1
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "2.8.0"
+  ami = "ami-06358f49b5839867c" # Ubuntu bionic id
+  instance_type = "t2.micro"
+  name = "ta-web-server"
+  subnet_id = module.vpc.public_subnets[0]
+  vpc_security_group_ids      = [
+    module.allow-public-http-security-group.this_security_group_id, 
+    module.allow-public-https-security-group.this_security_group_id,
+    module.allow-public-ssh-security-group.this_security_group_id,
+    module.allow-public-icmp-security-group.this_security_group_id
+  ]
+  associate_public_ip_address = true
+  key_name = "key-ta"
+  root_block_device = [
+    {
+      device_name = "/dev/sda1"
+      volume_type = "gp2"
+      volume_size = 8
+      encrypted   = true
+    },
+  ]
+  tags = {
+    Function = "ta-web-server"
+  }
 }
 
 ##################

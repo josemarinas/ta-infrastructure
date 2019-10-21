@@ -1,3 +1,6 @@
+output "frontend-dns" {
+  value = module.instance-frontend.public_dns
+}
 output "frontend-ip" {
-  value = "value"
+  value = module.instance-frontend.public_ip
 }

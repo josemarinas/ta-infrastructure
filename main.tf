@@ -19,6 +19,7 @@ module "vpc" {
   azs             = ["eu-west-1a"]
   # private_subnets = ["10.0.2.0/24"]
   public_subnets  = ["10.0.1.0/24"]
+  enable_dns_hostnames = true
 
   database_subnet_assign_ipv6_address_on_creation = false
   elasticache_subnet_assign_ipv6_address_on_creation = false
@@ -36,11 +37,11 @@ module "vpc" {
 module "sqs-input" {
   source  = "terraform-aws-modules/sqs/aws"
   version = "2.0.0"
-  name = "ta-input-queue.fifo"
-  fifo_queue = true
-  visibility_timeout_seconds = 3
+  name = "ta-input-queue"
+  # fifo_queue = true
+  # visibility_timeout_seconds = 2
   tags = {
-    Name = "ta-input-queue.fifo"
+    Name = "ta-input-queue"
     Flow = "input"
   }
 }
@@ -48,11 +49,11 @@ module "sqs-input" {
 module "sqs-output" {
   source  = "terraform-aws-modules/sqs/aws"
   version = "2.0.0"
-  name = "ta-output-queue.fifo"
-  fifo_queue = true
-  visibility_timeout_seconds = 3
+  name = "ta-output-queue"
+  # fifo_queue = true
+  # visibility_timeout_seconds = 2
   tags = {
-    Name = "ta-output-queue.fifo"
+    Name = "ta-output-queue"
     Flow = "output"
   }
 }
